@@ -1,3 +1,5 @@
-import HomeHeroData from '../Controller/Home_Data/home_hero.js' 
+import SectionController from "./SectionController/SectionController.js";
+import ScreenController from "./screenController/screenController.js";
 
-export {HomeHeroData};
+
+export { SectionController, ScreenController }

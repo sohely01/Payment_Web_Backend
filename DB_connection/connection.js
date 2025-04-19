@@ -3,8 +3,8 @@ import mysql from "mysql";
 const confifDB = {
   host: "localhost",
   user: "root",
-  password: "Sohel@786",  
-  database: "paymentweb", 
+  password: "",  
+  database: "payment_getway", 
 };
 
 const connection = mysql.createConnection(confifDB);
