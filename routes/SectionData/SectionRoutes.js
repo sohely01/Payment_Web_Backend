@@ -1,61 +1,21 @@
 import express, { Router } from "express";
 import { SectionController } from "../../Controller/index.js";
+import { postApiValidation } from "../../middleware/index.js";
 
 const SDRoute = Router();
 
 // 🔒 Allow only POST for each route
-SDRoute.route("/findone")
-    .post(SectionController.findOneSection)
-    .all((req, res) => {
-        res.status(405).json({
-            status: "failed",
-            message: `${req.method} method not allowed on this route. Only POST is allowed.`
-        });
-    });
 
-SDRoute.route("/findAllsection")
-    .post(SectionController.findAllSection)
-    .all((req, res) => {
-        res.status(405).json({
-            status: "failed",
-            message: `${req.method} method not allowed on this route. Only POST is allowed.`
-        });
-    });
 
-SDRoute.route("/updatesection")
-    .post(SectionController.updateSection)
-    .all((req, res) => {
-        res.status(405).json({
-            status: "failed",
-            message: `${req.method} method not allowed on this route. Only POST is allowed.`
-        });
-    });
+SDRoute.route("/findonesection").all(postApiValidation).post(SectionController.findOneSection)
+SDRoute.route('/findAllsection').all(postApiValidation).post(SectionController.findAllSection)
+SDRoute.route('/updatesection').all(postApiValidation).post(SectionController.updateSection)
+SDRoute.route('/deletesection').all(postApiValidation).post(SectionController.deleteSection)
+SDRoute.route('/hideshowsection').all(postApiValidation).post(SectionController.hideShowSection)
+SDRoute.route('/createsection').all(postApiValidation).post(SectionController.createSection)
+SDRoute.route('/addremaining').all(postApiValidation).post(SectionController.getSectionDetailsByScreenId)
 
-SDRoute.route("/deletesection")
-    .post(SectionController.deleteSection)
-    .all((req, res) => {
-        res.status(405).json({
-            status: "failed",
-            message: `${req.method} method not allowed on this route. Only POST is allowed.`
-        });
-    });
 
-SDRoute.route("/hideshow")
-    .post(SectionController.hideShowSection)
-    .all((req, res) => {
-        res.status(405).json({
-            status: "failed",
-            message: `${req.method} method not allowed on this route. Only POST is allowed.`
-        });
-    });
 
-SDRoute.route("/createsection")
-    .post(SectionController.createSection)
-    .all((req, res) => {
-        res.status(405).json({
-            status: "failed",
-            message: `${req.method} method not allowed on this route. Only POST is allowed.`
-        });
-    });
 
 export default SDRoute;

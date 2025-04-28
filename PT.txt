@@ -1,0 +1,25 @@
+common procedural statement in Node js
+
+-- Variable declaration (let , const)
+-- Function Call
+-- Conditional (if, else)
+-- Loops (for , while)
+-- Database calls
+-- File Reading/ Writing
+
+
+
+-- File Reading/ Writing
+
+        Reading a file (File system module)
+
+        const fs =require ('fs')        ----- First we want to import this
+
+        fs.wridFile('example.txt', 'utf8'(err, data)=>{
+            if(err){
+                console.log("Error Reading file :" ,err);
+
+            }else{
+                console.log("file content :", data);
+            }
+        })
