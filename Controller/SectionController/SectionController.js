@@ -1,5 +1,7 @@
 import connection from "../../DB_Connection/connection.js";
 
+
+
 class SectionController {
     static findOneSection = (req, res) => {
         if (!req.body) {
@@ -77,16 +79,23 @@ class SectionController {
     };
 
     static updateSection = (req, res) => {
-
         // Check for empty body
-        if (!req.body) { return res.send({ "status": "failed", "message": "Request body is empty." }) }
+        if (!req.body) {
+            return res.send({ "status": "failed", "message": "Request body is empty." })
+        }
+
+        console.log("req.body", req.body);
 
         const { id, heading, description, sectionData } = req.body;
-        if (!id) { return res.status(400).json({ status: "failed", message: "Section ID is required." }) }
+
+        // Check if ID is provided and ensure it's a valid number
+        if (!id) {
+            return res.status(400).json({ status: "failed", message: "Section ID is required." });
+        }
 
         // Step 1: Check if record exists
-        const checkQuery = `SELECT * FROM sections WHERE id = ${id}`;
-        connection.query(checkQuery, (checkErr, checkResult) => {
+        const checkQuery = `SELECT * FROM sections WHERE id = ?`;
+        connection.query(checkQuery, [id], (checkErr, checkResult) => {
             if (checkErr) {
                 console.error("❌ Error checking section:", checkErr.sqlMessage || checkErr);
                 return res.status(500).json({ status: "error", message: "Error validating Section ID" });
@@ -95,26 +104,37 @@ class SectionController {
             if (checkResult.length === 0) {
                 return res.status(404).json({ status: "failed", message: "Section ID does not exist." });
             }
-        });
 
-        // Step 2: Update the section
-        const sectionDataString = JSON.stringify(sectionData); // Convert array to JSON string
+            // Step 2: Update the section
+            // Ensure sectionData is a valid JSON string before updating
+            // Here, we use `JSON.stringify()` to make sure it's in string format
+            let sectionDataString = "";
 
-        const updateQuery = "UPDATE sections SET heading = ?, description = ?, sectionData = ? WHERE id = ?";
-        connection.query(updateQuery, [heading, description, sectionDataString, id], (updateErr, updateResult) => {
-            if (updateErr) {
-                console.error("❌ Error updating section:", updateErr.sqlMessage || updateErr);
-                return res.status(500).json({ status: "error", message: "Error updating section" });
+            try {
+                // If sectionData is a string already, we just use it; otherwise, stringify it
+                sectionDataString = typeof sectionData === 'string' ? sectionData : JSON.stringify(sectionData);
+            } catch (err) {
+                console.error("❌ Error stringifying sectionData:", err);
+                return res.status(400).json({ status: "failed", message: "Invalid section data format." });
             }
 
-            if (updateResult.affectedRows === 0) {
-                return res.status(400).json({ status: "failed", message: "No rows were updated." });
-            }
+            const updateQuery = "UPDATE sections SET heading = ?, description = ?, sectionData = ? WHERE id = ?";
+            connection.query(updateQuery, [heading, description, sectionDataString, id], (updateErr, updateResult) => {
+                if (updateErr) {
+                    console.error("❌ Error updating section:", updateErr.sqlMessage || updateErr);
+                    return res.status(500).json({ status: "error", message: "Error updating section" });
+                }
 
-            return res.status(200).json({ status: "success", message: "Section updated successfully." });
+                if (updateResult.affectedRows === 0) {
+                    return res.status(400).json({ status: "failed", message: "No rows were updated." });
+                }
+
+                return res.status(200).json({ status: "success", message: "Section updated successfully." });
+            });
         });
-
     };
+
+
 
     static deleteSection = (req, res) => {
         console.log(req.body);
@@ -274,6 +294,50 @@ class SectionController {
             });
         });
     };
+
+
+    static getAllSectionData = (req, res) => {
+        const query = `SELECT id, sectionData FROM sections`;
+
+        connection.query(query, (err, result) => {
+            if (err) {
+                console.error("❌ Error fetching data:", err);
+                return res.status(500).json({
+                    status: "error",
+                    message: "Failed to fetch data",
+                });
+            }
+
+            // Filter out rows where sectionData is empty, undefined, null, or empty JSON strings
+            const filteredResult = result.filter((row) => {
+                const data = row.sectionData;
+
+                if (
+                    !data ||
+                    typeof data !== 'string' || // invalid type
+                    ['null', 'undefined', '{}', '[]'].includes(data.trim())
+                ) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            if (filteredResult.length === 0) {
+                return res.status(404).json({
+                    status: "failed",
+                    message: "No valid sectionData found",
+                });
+            }
+
+            return res.status(200).json({
+                status: "success",
+                message: "Section data retrieved successfully",
+                data: filteredResult,
+            });
+        });
+    };
+
 
 }
 

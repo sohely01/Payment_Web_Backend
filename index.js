@@ -1,4 +1,6 @@
 import express from "express";
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import SDRoute from "./routes/routes_index.js";
 import SCRoute from "./routes/routes_index.js";
 import cors from 'cors';
